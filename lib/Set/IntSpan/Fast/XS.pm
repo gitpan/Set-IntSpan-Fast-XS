@@ -7,6 +7,7 @@ use warnings;
 use Carp;
 use base qw( DynaLoader Set::IntSpan::Fast );
 use List::Util qw( max );
+use Data::Swap;
 
 =head1 NAME
 
@@ -14,7 +15,7 @@ Set::IntSpan::Fast::XS - Faster Set::IntSpan::Fast
 
 =head1 VERSION
 
-This document describes Set::IntSpan::Fast::XS version 0.01
+This document describes Set::IntSpan::Fast::XS version 0.02
 
 =head1 SYNOPSIS
 
@@ -33,7 +34,7 @@ See that module for details of the interface.
 =cut
 
 BEGIN {
-    our $VERSION = '0.01';
+    our $VERSION = '0.02';
     bootstrap Set::IntSpan::Fast::XS $VERSION;
 }
 
@@ -79,23 +80,90 @@ sub _tidy_ranges {
 
 sub add {
     my $self = shift;
-    # TODO: When the existing set is large and the number of insertions
-    # is small the old method will be quicker. We need to characterise
-    # this.
-    @$self = @{ $self->_merge( $self->_list_to_ranges( \@_ ), $self ) };
+    if ( @_ < 100 ) {
+        $self->_add_splice( @_ );
+    }
+    else {
+        $self->_add_merge( @_ );
+    }
+    return;
 }
 
 sub add_range {
     my $self = shift;
-    @$self = @{ $self->_merge( $self->_tidy_ranges( \@_ ), $self ) };
+    if ( @_ < 100 ) {
+        $self->_add_range_splice( @_ );
+    }
+    else {
+        $self->_add_range_merge( @_ );
+    }
+    return;
+}
+
+sub _add_merge {
+    my $self = shift;
+    $self->_merge_and_swap( $self->_list_to_ranges( \@_ ), $self );
+}
+
+sub _add_range_merge {
+    my $self = shift;
+    $self->_merge_and_swap( $self->_tidy_ranges( \@_ ), $self );
+}
+
+sub _splice {
+    my ( $self, $from, $into ) = @_;
+
+    my $class = ref $self;
+
+    if ( @$from > @$into ) {
+        swap $from, $into;
+        bless $into, $class;
+    }
+
+    my $count = scalar @$from;
+
+    for ( my $p = 0; $p < $count; $p += 2 ) {
+        my ( $from, $to ) = ( $from->[$p], $from->[ $p + 1 ] );
+
+        my $fpos = $self->_find_pos( $from );
+        my $tpos = $self->_find_pos( $to + 1, $fpos );
+
+        $from = $into->[ --$fpos ] if ( $fpos & 1 );
+        $to   = $into->[ $tpos++ ] if ( $tpos & 1 );
+
+        splice @$into, $fpos, $tpos - $fpos, ( $from, $to );
+    }
+
+    swap $self, $into;
+    bless $self, $class;
+
+    return;
+}
+
+sub _add_splice {
+    my $self = shift;
+    $self->_splice( $self->_list_to_ranges( \@_ ), $self );
+}
+
+sub _add_range_splice {
+    my $self = shift;
+    $self->_splice( $self->_tidy_ranges( \@_ ), $self );
+}
+
+sub _merge_and_swap {
+    my $self = shift;
+    my $new  = $self->_merge( @_ );
+
+    my $class = ref $self;
+    swap $self, $new;
+    bless $self, $class;
+
+    return;
 }
 
 sub merge {
     my $self = shift;
-
-    for my $other ( @_ ) {
-        @$self = @{ $self->_merge( $self, $other ) };
-    }
+    $self->_merge_and_swap( $self, $_ ) for @_;
 }
 
 1;
@@ -110,7 +178,7 @@ Please report any bugs or feature requests to
 C<bug-set-intspan-fast-xs@rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org>.
 
-==head1 AUTHOR
+=head1 AUTHOR
 
 Andy Armstrong  C<< <andy.armstrong@messagesystems.com> >>
 
