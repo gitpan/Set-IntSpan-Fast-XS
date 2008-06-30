@@ -1,0 +1,40 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.55.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 a3cd199c2984e8acd78f8581c19239954ecc167f Changes
+SHA1 417ddce9bf199edc8a49a4c3ee7fa412cb1c8a3b MANIFEST
+SHA1 ce663e554d497743465781e7ee37542c3fa68918 META.yml
+SHA1 a3da6ccab0964e08a7c538d73e8d64d00e754a3a Makefile.PL
+SHA1 1e59b24a21bb075da8732a87c25ea8c45863a993 README
+SHA1 6df8ffe80d8055a45fe9cbf837c45a5684965152 XS.xs
+SHA1 8b8680fdcc4ff2a0d1f154ee8e0a094f3db823e6 inc/Devel/CheckLib.pm
+SHA1 980f119824a7721b896f1a0d56c7793758bac463 lib/Set/IntSpan/Fast/XS.pm
+SHA1 fdefb7d5fe9da55912ef91143e895a847cd35562 t/00-load.t
+SHA1 db12790f3e9888e3b0da3018dac63faac6694839 t/all-range.t
+SHA1 0f4cc484f05db325786650083ee5552c053a2d0a t/basic.t
+SHA1 7dd3e6e1c1b34413293855fa777070f1065fd642 t/construct.t
+SHA1 71f6861ef18c3a01336b57c3afb1c8f442232a48 t/internals.t
+SHA1 4d3b0e05378c37a49559020f18ef15fa651839e9 t/misc.t
+SHA1 fb0b351fa26f680398473e6d9526a7a083cd88b4 t/miscstring.t
+SHA1 0190346d7072d458c8a10a45c19f86db641dcc48 t/pod.t
+SHA1 761b55eeb5feb6db29cf9b1a5398ddb2d917a62c t/string.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (Darwin)
+
+iEYEARECAAYFAkhorv0ACgkQwoknRJZQnCEDRACeIk47rgR8YIA1CZUQaNAUrfYM
+uh4An1jiBLuHBCXuououj3tMoB+5JE2W
+=eAbP
+-----END PGP SIGNATURE-----
